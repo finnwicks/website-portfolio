@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Finn Wicks</title>
+  <link rel="icon" href="../images/wicks-tech-favicon.png">
+  <style>
+    *{margin:0;padding:0;box-sizing:border-box}
+    html,body{height:100%;scroll-behavior:smooth}
+    body{
+      font-family:ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+      background:#fff;color:#000;overflow-x:hidden;position:relative;
+    }
+
+    /* ===== Ambient background ===== */
+    :root{--navy-1:20,30,70;--navy-2:24,44,96;--navy-3:16,60,120;--navy-4:10,20,40;}
+    .mesh-bg{position:fixed;inset:0;z-index:0;pointer-events:none;overflow:hidden}
+    .mesh-bg::before{content:"";position:absolute;inset:0;background:rgba(var(--navy-1),.05)}
+    .blob{position:absolute;width:18vmax;height:18vmax;border-radius:50%;filter:blur(40px);opacity:.6;mix-blend-mode:multiply;background:radial-gradient(circle,rgba(var(--navy-2),.65),transparent 70%);animation:drift 10s ease-in-out infinite;will-change:transform}
+    .b1{top:10%;left:15%;background:radial-gradient(circle,rgba(var(--navy-3),.65),transparent 70%)}
+    .b2{top:30%;left:60%}
+    .b3{top:70%;left:20%;background:radial-gradient(circle,rgba(var(--navy-1),.65),transparent 70%)}
+    .b4{top:40%;left:80%;background:radial-gradient(circle,rgba(var(--navy-4),.6),transparent 70%)}
+    .b5{top:80%;left:50%;background:radial-gradient(circle,rgba(var(--navy-3),.6),transparent 70%)}
+    .grain{position:absolute;inset:0;background-image:
+      radial-gradient(1px 1px at 10% 20%,rgba(255,255,255,.03) 0,transparent 60%),
+      radial-gradient(1px 1px at 70% 80%,rgba(255,255,255,.02) 0,transparent 60%);
+      opacity:.4;animation:grainShift 8s steps(2) infinite;mix-blend-mode:soft-light}
+    @keyframes drift{0%{transform:translate(0,0) scale(1)}25%{transform:translate(20%,-15%) scale(1.1)}50%{transform:translate(-15%,25%) scale(.9)}75%{transform:translate(15%,-10%) scale(1.05)}100%{transform:translate(0,0) scale(1)}}
+    @keyframes grainShift{0%{transform:translate3d(0,0,0)}100%{transform:translate3d(2%,-2%,0)}}
+
+    /* ===== HERO ===== */
+    .hero{
+      position:fixed;top:50%;left:50%;transform:translate(-50%,-50%) scale(1);
+      z-index:10;transition:transform 1.6s ease,opacity 1.6s ease;opacity:1;
+      font-size:clamp(28px,4vw,48px);line-height:1;
+    }
+    .hero.fade-out{opacity:0;transform:translate(-50%,-225%) scale(0.55);pointer-events:none}
+    .hero-line{display:inline-flex;align-items:baseline;gap:0;}
+    .hero-bracket{font-weight:700;line-height:1;}
+    .typed-text{
+      display:inline-block;white-space:nowrap;overflow:hidden;width:0;border-right:3px solid #000;
+      animation:typingHero 1.6s steps(10,end) forwards, blinkHero .8s step-end infinite;
+    }
+    @keyframes typingHero{from{width:0}to{width:10ch}}
+    @keyframes blinkHero{50%{border-color:transparent}}
+
+    /* ===== HEADER / NAV ===== */
+    header{
+      position:sticky;top:0;z-index:15;background:rgba(255,255,255,.9);backdrop-filter:blur(8px);
+      box-shadow:0 2px 6px rgba(0,0,0,.08);transform:translateY(-100%);transition:transform .8s ease;
+    }
+    header.show{transform:translateY(0);}
+    .nav-row{max-width:900px;margin:0 auto;padding:16px 20px;display:grid;grid-template-columns:1fr auto 1fr;align-items:center;}
+    .nav-left{justify-self:end;text-align:right}
+    .nav-name{justify-self:center;text-align:center}
+    .nav-right{justify-self:start;text-align:left}
+    .bracket{font-size:clamp(14px,1.6vw,18px);white-space:nowrap;line-height:1;}
+    .bracket>.slot{display:inline-block;opacity:0;transform:translateY(-4px);animation:fadeIn .8s ease forwards;animation-delay:.2s;vertical-align:baseline;}
+    .nav-name .slot,.nav-right .slot{animation-delay:.4s}
+    @keyframes fadeIn{from{opacity:0;transform:translateY(-6px)}to{opacity:1;transform:none}}
+    a{color:inherit;text-decoration:none}a:hover{text-decoration:underline}
+
+    /* ===== MAIN / PROJECTS ===== */
+    main{padding:60px 20px;max-width:1000px;margin:0 auto;opacity:0;transform:translateY(40px);transition:opacity .8s ease,transform .8s ease;z-index:2;position:relative;}
+    main.show{opacity:1;transform:none}
+    h2{font-size:clamp(20px,2.5vw,28px);margin-bottom:30px;text-align:center;}
+
+    /* Grid: 2x2 (desktop), stacks on small screens */
+    .projects{
+      display:grid;
+      grid-template-columns:repeat(2,minmax(0,1fr));
+      gap:28px;
+      transition:opacity .6s ease, filter .6s ease;
+    }
+    @media (max-width:700px){
+      .projects{grid-template-columns:1fr}
+    }
+
+    .project{
+      position:relative;
+      padding:22px 26px;
+      font-size:15px;line-height:1.4;
+      opacity:0;transform:translateY(30px);
+      transition:
+        opacity .6s ease,
+        transform .6s ease,
+        background .5s ease,
+        border-color .5s ease,
+        padding .5s ease;
+      cursor:pointer;overflow:hidden;
+      border:1px solid transparent;border-radius:12px;
+      will-change:opacity,transform,max-height;
+      background:rgba(0,0,0,0.02);
+    }
+    .project.visible{opacity:1;transform:none;}
+
+    /* overview brackets */
+    .project::before,.project::after{
+      position:absolute;color:#000;font-weight:bold;font-size:18px;opacity:0;transition:opacity .6s ease}
+    .project::before{content:"[";left:-16px;top:0}
+    .project::after{content:"]";right:-16px;bottom:0}
+    .project.visible::before,.project.visible::after{opacity:1}
+
+    /* Expanded spans full row for room */
+    .project.expanded{
+      background:rgba(0,0,0,0.04);
+      border-color:rgba(0,0,0,0.12);
+      padding:34px 34px;
+      cursor:auto;
+      grid-column:1 / -1; /* span both columns in grid */
+    }
+    .project.expanded::before,.project.expanded::after{opacity:0;}
+
+    .project h3{margin-bottom:6px;}
+    .project .subheader{display:block;font-weight:600;margin:0 0 10px 0;opacity:.85;}
+
+    /* Smooth, reversible expansion for detail block */
+    .detail{
+      max-height:0;
+      opacity:0;
+      overflow:hidden;
+      transform:translateY(-6px);
+      padding-top:0;
+      transition:
+        max-height .8s ease,
+        opacity .6s ease,
+        transform .6s ease,
+        padding .6s ease;
+    }
+    .project.expanded .detail{
+      max-height:1200px;
+      opacity:1;
+      transform:none;
+      padding-top:12px;
+    }
+
+    .project img{
+      width:100%;max-width:820px;margin-top:16px;border-radius:8px;opacity:0;transition:opacity .6s ease;
+    }
+    .project.expanded img{opacity:1;}
+
+    /* Fade others (grid-safe) */
+    .projects.fade-others .project:not(.expanded){
+      opacity:.08;
+      filter:blur(.4px);
+      pointer-events:none;
+    }
+
+    /* Back to Home card (same style as expanded section) */
+    .back-card{
+      position:fixed;left:50%;bottom:24px;transform:translateX(-50%) translateY(12px);
+      background:rgba(0,0,0,0.04);
+      border:1px solid rgba(0,0,0,0.12);
+      border-radius:12px;
+      box-shadow:0 4px 14px rgba(0,0,0,0.08);
+      padding:10px 16px;
+      z-index:20;
+      opacity:0;
+      transition:opacity .5s ease, transform .5s ease, backdrop-filter .4s ease;
+      backdrop-filter:blur(6px);
+      user-select:none;
+      display:flex;align-items:center;gap:10px;
+      cursor:pointer;
+      font-size:14px;
+    }
+    .back-card::before{content:"[";font-weight:700;opacity:.9}
+    .back-card::after{content:"]";font-weight:700;opacity:.9}
+    .back-card.show{
+      opacity:1;
+      transform:translateX(-50%) translateY(0);
+    }
+    .back-card:hover{box-shadow:0 6px 18px rgba(0,0,0,0.12)}
+    .back-card .label{opacity:.95}
+    .back-card .hint{opacity:.6;font-size:12px}
+  </style>
+</head>
+<body>
+  <!-- Ambient background -->
+  <div class="mesh-bg" aria-hidden="true">
+    <span class="blob b1"></span><span class="blob b2"></span><span class="blob b3"></span>
+    <span class="blob b4"></span><span class="blob b5"></span><span class="grain"></span>
+  </div>
+
+  <!-- HERO -->
+  <div class="hero" id="hero">
+    <span class="hero-line">
+      <span class="hero-bracket">[</span>
+      <span class="typed-text" id="typedText">Finn Wicks</span>
+      <span class="hero-bracket">]</span>
+    </span>
+  </div>
+
+  <!-- HEADER -->
+  <header id="header" aria-label="Primary">
+    <div class="nav-row">
+      <span class="bracket nav-left">[ <span class="slot">finn.wicks@wickstech.co.uk</span> ]</span>
+      <span class="bracket nav-name">[ <span class="slot">Finn Wicks</span> ]</span>
+      <span class="bracket nav-right">[ <span class="slot"><a href="https://github.com/finnwicks/" rel="noreferrer noopener">&lt;github&gt;</a> <a href="https://www.linkedin.com/in/finn-wicks?utm_source=share&utm_campaign=share_via&utm_content=profile&utm_medium=android_app" rel="noreferrer noopener">&lt;linkedin&gt;</a></span> ]</span>
+    </div>
+  </header>
+
+  <!-- MAIN -->
+  <main id="mainContent">
+    <section id="projects">
+      <h2>[ Projects ]</h2>
+      <div class="projects" id="projectsContainer">
+        <div class="project">
+          <h3>Mobile Edutainment Game Backend</h3>
+          <span class="subheader">Overview</span>
+          <p>A full scalable backend for an educational mobile game, using MongoDB Atlas, Node and Express, and integrating with Unity's webrequest API. It was hosted on AWS with automatic load balancing, unattended upgrades, automatic SSL renewal and a self-healing hosting methodology..</p>
+          <div class="detail">
+            <span class="subheader">Tech Stack: React, Node.js, MongoDB</span>
+            <p>Supports horizontal sharding, asynchronous requests, and a K-Means Clustering (Machine Learning) based lightweight user personalisation system. Tested with: Postman, Unity, and MongoDB.</p>
+            <p><a href="https://github.com/finnwicks/WT_Demo_STEMEngine_Backend">github</a></p>
+          </div>
+        </div>
+
+        <div class="project">
+          <h3>Pneumatic Solenoid Valve Controller</h3>
+          <span class="subheader">with a Raspberry Pi 0 2 W</span>
+          <p>A low-level controller for a pneumatic solenoid valve powered by a RPi 0 2W.</p>
+          <div class="detail">
+            <span class="subheader">Python, GPIO, Relay</span>
+            <p>Integrated with a high/low level relay using GPIO 17.</p>
+            <p><a href="https://github.com/finnwicks/WT_Demo_RPI_ValveController">github</a></p>
+          </div>
+        </div>
+
+        <div class="project">
+          <h3>Dunebug Graphics</h3>
+          <span class="subheader">Web Design</span>
+          <p></p>
+          <div class="detail">
+            <span class="subheader">HTML, JS, CSS</span>
+            <p>A portfolio website for an industry veteran with twenty years of experience in immersive art, visual art and user interface design.</p>
+            <p><a href="https://www.kevinwicks.com/">Website</a></p>
+          </div>
+        </div>
+
+        <div class="project">
+          <h3>Low Pass Filter</h3>
+          <span class="subheader">Digital Signal Processing</span>
+          <p>Preliminary testing indicates that this Low Pass Filter prototype offers greater passband flatness and Signal To Noise Ratio (SNR) compared to Infinite Impulse Response Filters, while maintaining a similar execution time and resource profile.
+Authored in Python, however the mathematical nature of Low Pass Filters means it can be deployed in any language.</p>
+          <div class="detail">
+            <span class="subheader">Tech Stack: Matplotlib</span>
+            <p>Due to the sensitive intellectual property regarding this filter and ongoing development, this project does not have a codebase available.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <!-- Back to Home "card" -->
+  <button id="backCard" class="back-card" aria-hidden="true">
+    <span class="label">Back to Home</span>
+  </button>
+
+  <script>
+    /* Intro sequence */
+    const hero = document.getElementById('hero');
+    const header = document.getElementById('header');
+    const main = document.getElementById('mainContent');
+    const projects = document.querySelectorAll('.project');
+    const projectsContainer = document.getElementById('projectsContainer');
+    const backCard = document.getElementById('backCard');
+
+    const HERO_TYPE_END_MS=1600, HERO_HOLD_MS=700, HERO_EXIT_DURATION=1600, AFTER_NAV_MS=500;
+
+    setTimeout(()=>{
+      hero.classList.add('fade-out');
+      setTimeout(()=>{
+        hero.style.display='none';
+        header.classList.add('show');
+        setTimeout(()=>{
+          main.classList.add('show');
+          projects.forEach((proj,i)=>{
+            setTimeout(()=>proj.classList.add('visible'),i*200);
+          });
+        },AFTER_NAV_MS);
+      },HERO_EXIT_DURATION);
+    },HERO_TYPE_END_MS+HERO_HOLD_MS);
+
+    /* Expansion logic in grid */
+    function expandProject(project){
+      const current = document.querySelector('.project.expanded');
+      if(current && current !== project){
+        collapseProject(current, false);
+        setTimeout(()=>applyExpand(project), 220);
+      }else{
+        applyExpand(project);
+      }
+    }
+
+    function applyExpand(project){
+      projectsContainer.classList.add('fade-others');
+      project.classList.add('expanded');
+      backCard.classList.add('show');
+      backCard.setAttribute('aria-hidden','false');
+
+      // Scroll expanded card into view accounting for sticky header
+      const headerRect = header.getBoundingClientRect();
+      const headerH = headerRect.height || 68;
+      const y = project.getBoundingClientRect().top + window.scrollY - (headerH + 16);
+      window.scrollTo({top:y, behavior:'smooth'});
+    }
+
+    function collapseProject(project, restoreAll=true){
+      project.classList.remove('expanded');
+      setTimeout(()=>{
+        if(restoreAll){
+          projectsContainer.classList.remove('fade-others');
+          backCard.classList.remove('show');
+          backCard.setAttribute('aria-hidden','true');
+          const projectsHeader = document.querySelector('#projects h2');
+          const headerRect = header.getBoundingClientRect();
+          const headerH = headerRect.height || 68;
+          const y = projectsHeader.getBoundingClientRect().top + window.scrollY - (headerH + 12);
+          window.scrollTo({top:y, behavior:'smooth'});
+        }
+      }, 820);
+    }
+
+    projects.forEach(project=>{
+      project.addEventListener('click', ()=>{
+        if(project.classList.contains('expanded')) return;
+        expandProject(project);
+      });
+    });
+
+    backCard.addEventListener('click', ()=>{
+      const expanded = document.querySelector('.project.expanded');
+      if(expanded) collapseProject(expanded, true);
+    });
+  </script>
+</body>
+</html>
